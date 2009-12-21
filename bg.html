@@ -1,0 +1,157 @@
+<html>
+<head>
+<script>
+	var click_ref = false;
+	var mg = "Tab Catch is enabled: ";
+	var page_ids = new Array();
+	var title_folder_id = -1;
+	var nav_target_tab_id = -1;
+	var EnDisButtonText = "Enable";
+	var NextButtonMessage = "Next";
+	var enable_next_button = true;
+	
+	var title_desired = localStorage["queue_folder_name"];
+	if( !title_desired ){
+		title_desired = "Queue";
+		localStorage["queue_folder_name"] = title_desired;
+	}
+	
+	//console.log( "Startup" );
+	
+	//chrome.browserAction.setBadgeText( { "text": "OFF" } );
+	
+	var en_dis_func = function() {
+			click_ref = !click_ref;
+			if( click_ref ){
+				//chrome.browserAction.setBadgeText( { "text": "ON" } );
+				chrome.browserAction.setIcon( { "path": "stack_icon_red.png" } );
+				chrome.tabs.onCreated.addListener( the_on_created_function );
+				chrome.tabs.onUpdated.addListener( the_on_updated_function );
+				EnDisButtonText = "Disable";
+			}else{
+				//chrome.browserAction.setBadgeText( { "text": "OFF" } );
+				chrome.browserAction.setIcon( { "path": "stack_icon_green.png" } );
+				chrome.tabs.onCreated.removeListener( the_on_created_function );
+				chrome.tabs.onUpdated.removeListener( the_on_updated_function );
+				EnDisButtonText = "Enable";
+			}
+			//console.log( mg + click_ref );
+		};
+	
+	var the_on_created_function = function(tab) { 
+		if( tab.url.indexOf('chrome://') !=-1 ){
+			//console.log( "Chrome tag, do not mangle" );
+		}else{
+			if( page_ids[tab.id] == false ) {
+				//console.log( "Skipping intentionally" );
+			}else{
+				//console.log( "Tab created: " + tab.id);
+				page_ids[tab.id] = true;
+			}
+		}
+	};
+	
+	var the_on_updated_function = function(tabId, changeInfo, tab) { 
+		//console.log( "Id: " + tabId + " Url: " + tab.url );
+		if( page_ids[tabId] != undefined && page_ids[tabId] == true ){
+			if( tab.status == "complete" ){
+				//console.log( "Ready to create a bookmark with parent " + title_folder_id + " with url " + tab.url );
+				chrome.bookmarks.create(
+							{'parentId': title_folder_id,
+							 'title': tab.title,
+							 'url': tab.url},
+						 function( res ) { 
+							//console.log( "Added bookmark" );
+							updateBABadgeCount();
+						});
+				page_ids[tabId] = false;
+				chrome.tabs.remove( tabId );
+			}else{
+				//console.log( "Still waiting for loading to complete" );
+			}
+		}
+	};
+	
+	var getNextBookmark = function() {
+		chrome.bookmarks.getChildren( title_folder_id, function( results ) {
+			if( results.length > 0 ){
+				//console.log( "bookmark: " + results[0].title + " :: " + results[0].url );
+				if( nav_target_tab_id == -1 ){
+					//console.log( "Target tab not created, creating" );
+					chrome.tabs.create({'url':results[0].url}, function( tab ) {
+						page_ids[tab.id] = false;
+						nav_target_tab_id = tab.id;
+					});
+				}else{
+					//console.log( "Target tab already exists, updating it" );
+					chrome.tabs.update(nav_target_tab_id, {'url':results[0].url} );
+				}
+				chrome.bookmarks.remove( results[0].id, function() { updateBABadgeCount(); } );
+			}
+		});
+	};
+	
+	//console.log( "Search bookmarks" );
+	
+	var traverse_tree = function( results ) {
+		for (var i = 0; i < results.length; i++) {  
+			//console.log( results[i].id + " : " + results[i].title );
+			if( results[i].title == title_desired ){
+				//console.log( "Found with Id: " + results[i].id );
+				title_folder_id = results[i].id;
+				updateBABadgeCount();
+				break;
+			}else{
+				chrome.bookmarks.getChildren( results[i].id, traverse_tree );
+			}
+		}
+	}
+	
+	/*
+		var holdQueueCount = 0;
+		var queueFetchReady = false;
+		var getQueueCount = function(){
+			queueFetchReady = false;
+			chrome.bookmarks.getChildren(title_folder_id, function ( results ){
+				holdQueueCount = results.length;
+				queueFetchReady = true;
+			});
+			
+			while( !queueFetchReady ){
+			}
+			
+			return holdQueueCount;
+		};
+	*/
+	
+	var updateBABadgeCount = function(){
+		chrome.bookmarks.getChildren(title_folder_id, function ( results ){
+				chrome.browserAction.setBadgeText( { "text": results.length.toString() } );
+				if( results.length <= 0 ){
+					enable_next_button = false;
+				}else{
+					enable_next_button = true;
+				}
+			});
+	};
+	
+	var set_folder_parent = function(){
+		chrome.bookmarks.getTree( function( results ) {
+			for (var i = 0; i < results.length; i++) {  
+				//console.log( results[i].id + " : " + results[i].title );
+				traverse_tree( results[i].children );
+			}
+		});
+	};
+	
+	set_folder_parent();
+	updateBABadgeCount();
+	
+	chrome.tabs.onRemoved.addListener(function(tabId) {
+		if( tabId == nav_target_tab_id ) { nav_target_tab_id = -1; }
+	});
+	
+	console.log( "Registered" );
+</script>
+</head>
+</html>

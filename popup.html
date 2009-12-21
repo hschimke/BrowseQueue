@@ -1,0 +1,30 @@
+﻿<html>
+<script type="text/javascript">
+var enable_disable_function = function() {
+		chrome.extension.getBackgroundPage().en_dis_func();
+		window.close();
+	};
+var queue_pop_function = function() { 
+		chrome.extension.getBackgroundPage().getNextBookmark();
+		window.close();
+	};
+
+function startup(){
+	var en_n = chrome.extension.getBackgroundPage().enable_next_button;
+	if( !en_n ){
+		document.getElemenById( "pn" ).disabled = true;
+	}
+}
+</script>
+
+<body onload="startup()">
+<div>
+	<button onClick="enable_disable_function();" id="enab_disab">
+		<span><script>document.write( chrome.extension.getBackgroundPage().EnDisButtonText );</script></span>
+	</button>
+	<button onClick="queue_pop_function();" id="pn">
+		<span><script>document.write( chrome.extension.getBackgroundPage().NextButtonMessage );</script></span>
+	</button>
+</div>
+</body>
+</html>

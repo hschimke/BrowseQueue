@@ -1,0 +1,43 @@
+<html>
+<head><title>Browse Queue Options</title></head>
+<script type="text/javascript">
+
+// Saves options to localStorage.
+function save_options() {
+  var name_hold_control = document.getElementById("folder_name");
+  
+  var name_hold = name_hold_control.value;
+  localStorage["queue_folder_name"] = name_hold;
+
+  chrome.extension.getBackgroundPage().title_desired = name_hold;
+  chrome.extension.getBackgroundPage().set_folder_parent();
+  
+  // Update status to let user know options were saved.
+  var status = document.getElementById("status");
+  status.innerHTML = "Options Saved.";
+  setTimeout(function() {
+    status.innerHTML = "";
+  }, 750);
+}
+
+// Restores select box state to saved value from localStorage.
+function restore_options() {
+  var saved_name = localStorage["queue_folder_name"];
+  if (!saved_name) {
+    return;
+  }
+  var name_hold_control = document.getElementById("folder_name");
+  name_hold_control.value = saved_name
+}
+
+</script>
+
+<body onload="restore_options()">
+
+Queue Folder:
+<input type="text" id="folder_name" />
+
+<br>
+<button onclick="save_options()">Save</button>
+</body>
+</html>
