@@ -1,6 +1,6 @@
 {
   "name": "Browse Queue",
-  "version": "1.0.0.3",
+  "version": "1.0.0.7",
   "description": "Queue based browsing.",
   "background_page": "bg.html",
   "options_page": "options.html",

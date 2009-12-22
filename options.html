@@ -1,43 +1,109 @@
 <html>
 <head><title>Browse Queue Options</title></head>
 <script type="text/javascript">
+	// Saves options to localStorage.
+	function save_options_free() {
+	  var name_hold_control = document.getElementById("folder_name");
+	  //var folder_select = document.getElementById( "folder_list" );
+	  
+	  var name_hold = name_hold_control.value;
+	  
+	  localStorage["queue_folder_name"] = name_hold;
 
-// Saves options to localStorage.
-function save_options() {
-  var name_hold_control = document.getElementById("folder_name");
-  
-  var name_hold = name_hold_control.value;
-  localStorage["queue_folder_name"] = name_hold;
+	  chrome.extension.getBackgroundPage().title_desired = name_hold;
+	  chrome.extension.getBackgroundPage().set_folder_parent();
+	 
+	  populate_select();
+	}
+	
+	function save_options_select() {
+	  //var name_hold_control = document.getElementById("folder_name");
+	  var folder_select = document.getElementById( "folder_list" );
+	  
+	  var name_hold = folder_select.options[ folder_select.selectedIndex ].text;
+	  localStorage["queue_folder_name"] = name_hold;
+	  
+	  chrome.extension.getBackgroundPage().title_desired = name_hold;
+	  chrome.extension.getBackgroundPage().set_folder_parent();
+	  
+	  populate_select();
+	}
 
-  chrome.extension.getBackgroundPage().title_desired = name_hold;
-  chrome.extension.getBackgroundPage().set_folder_parent();
-  
-  // Update status to let user know options were saved.
-  var status = document.getElementById("status");
-  status.innerHTML = "Options Saved.";
-  setTimeout(function() {
-    status.innerHTML = "";
-  }, 750);
-}
+	function traverse_bookmarks( results ){
+		for (var j = 0; j < results.length; j++) {
+			var res = results[j];
+			
+			add_option_bkmrk( res );
+			
+			chrome.bookmarks.getChildren( res.id, traverse_bookmarks );
+		}
+		
+		if( results.length == 0 ){
+			restore_options();
+		//	alert("go");
+		}
+	}
+	
+	function add_option_bkmrk( mark ){
+		if( mark.id != "0" ){
+			if( mark.url == undefined ){
+				add_option( mark.title, mark.id );
+			}
+		}
+	}
+	
+	function add_option( opt_text, op_val ){
+		var folder_select = document.getElementById( "folder_list" );
+					
+		var opt = document.createElement( "option" );
+		opt.text = opt_text;
+		opt.value = op_val;
+		folder_select.options.add( opt );
+	}
+	
+	function populate_select() {
+		document.getElementById( "folder_list" ).options.length = 0;
+		chrome.bookmarks.getTree( traverse_bookmarks );
+	}
 
-// Restores select box state to saved value from localStorage.
-function restore_options() {
-  var saved_name = localStorage["queue_folder_name"];
-  if (!saved_name) {
-    return;
-  }
-  var name_hold_control = document.getElementById("folder_name");
-  name_hold_control.value = saved_name
-}
+	function restore_options() {
+		var saved_name = localStorage["queue_folder_name"];
+		if (!saved_name) {
+			return;
+		}
+		
+		var name_hold_control = document.getElementById("folder_name");
+		name_hold_control.value = saved_name;
+
+		var folder_select = document.getElementById( "folder_list" );
+		
+		var total = folder_select.options.length;
+	
+		for (var i = 0; i < total; i++) {
+			var child = folder_select.options[i];
+			if (child.text == saved_name) {
+				child.selected = "true";
+				break;
+			}
+		}
+	}
+	
+	function start_up(){
+		populate_select();
+		//restore_options();
+	}
 
 </script>
 
-<body onload="restore_options()">
-
-Queue Folder:
-<input type="text" id="folder_name" />
-
-<br>
-<button onclick="save_options()">Save</button>
+<body onload="start_up()">
+	Queue Folder:
+	<br />
+	<select id="folder_list">
+	</select>
+	<button onclick="save_options_select()">Select</button>
+	<br />
+	<br />
+	<input type="text" id="folder_name" />
+	<button onclick="save_options_free()">Use</button>
 </body>
 </html>

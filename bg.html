@@ -39,7 +39,7 @@
 		};
 	
 	var the_on_created_function = function(tab) { 
-		if( tab.url.indexOf('chrome://') !=-1 ){
+		if( tab.url.indexOf('chrome://') != -1 ){
 			//console.log( "Chrome tag, do not mangle" );
 		}else{
 			if( page_ids[tab.id] == false ) {
@@ -107,23 +107,6 @@
 		}
 	}
 	
-	/*
-		var holdQueueCount = 0;
-		var queueFetchReady = false;
-		var getQueueCount = function(){
-			queueFetchReady = false;
-			chrome.bookmarks.getChildren(title_folder_id, function ( results ){
-				holdQueueCount = results.length;
-				queueFetchReady = true;
-			});
-			
-			while( !queueFetchReady ){
-			}
-			
-			return holdQueueCount;
-		};
-	*/
-	
 	var updateBABadgeCount = function(){
 		chrome.bookmarks.getChildren(title_folder_id, function ( results ){
 				chrome.browserAction.setBadgeText( { "text": results.length.toString() } );
@@ -145,13 +128,13 @@
 	};
 	
 	set_folder_parent();
-	updateBABadgeCount();
+	//updateBABadgeCount();
 	
 	chrome.tabs.onRemoved.addListener(function(tabId) {
 		if( tabId == nav_target_tab_id ) { nav_target_tab_id = -1; }
 	});
 	
-	console.log( "Registered" );
+	//console.log( "Registered" );
 </script>
 </head>
 </html>
