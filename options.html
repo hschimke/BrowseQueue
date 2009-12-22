@@ -2,28 +2,13 @@
 <head><title>Browse Queue Options</title></head>
 <script type="text/javascript">
 	// Saves options to localStorage.
-	function save_options_free() {
-	  var name_hold_control = document.getElementById("folder_name");
-	  //var folder_select = document.getElementById( "folder_list" );
-	  
-	  var name_hold = name_hold_control.value;
-	  
-	  localStorage["queue_folder_name"] = name_hold;
-
-	  chrome.extension.getBackgroundPage().title_desired = name_hold;
-	  chrome.extension.getBackgroundPage().set_folder_parent();
-	 
-	  populate_select();
-	}
-	
 	function save_options_select() {
-	  //var name_hold_control = document.getElementById("folder_name");
 	  var folder_select = document.getElementById( "folder_list" );
 	  
-	  var name_hold = folder_select.options[ folder_select.selectedIndex ].text;
-	  localStorage["queue_folder_name"] = name_hold;
+	  var id_hold = folder_select.options[ folder_select.selectedIndex ].value;
+	  localStorage["queue_folder_id"] = id_hold;
 	  
-	  chrome.extension.getBackgroundPage().title_desired = name_hold;
+	  chrome.extension.getBackgroundPage().title_folder_id = id_hold;
 	  chrome.extension.getBackgroundPage().set_folder_parent();
 	  
 	  populate_select();
@@ -65,27 +50,29 @@
 		document.getElementById( "folder_list" ).options.length = 0;
 		chrome.bookmarks.getTree( traverse_bookmarks );
 	}
-
-	function restore_options() {
-		var saved_name = localStorage["queue_folder_name"];
-		if (!saved_name) {
-			return;
-		}
-		
-		var name_hold_control = document.getElementById("folder_name");
-		name_hold_control.value = saved_name;
-
+	
+	function restore_options_2( bkmrk ){
 		var folder_select = document.getElementById( "folder_list" );
 		
 		var total = folder_select.options.length;
 	
 		for (var i = 0; i < total; i++) {
 			var child = folder_select.options[i];
-			if (child.text == saved_name) {
+			//console.log( "Text: '" + child.text + "' Value: '" + child.value + "' BkMrkId: '" + bkmrk[0].id + "'" );
+			if (child.value == bkmrk[0].id) {
 				child.selected = "true";
 				break;
 			}
 		}
+	}
+
+	function restore_options() {
+		var saved_id = localStorage["queue_folder_id"];
+		if (!saved_id) {
+			return;
+		}
+		
+		chrome.bookmarks.get( saved_id, restore_options_2 );
 	}
 	
 	function start_up(){
@@ -101,9 +88,5 @@
 	<select id="folder_list">
 	</select>
 	<button onclick="save_options_select()">Select</button>
-	<br />
-	<br />
-	<input type="text" id="folder_name" />
-	<button onclick="save_options_free()">Use</button>
 </body>
 </html>

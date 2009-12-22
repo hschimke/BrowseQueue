@@ -10,15 +10,57 @@
 	var NextButtonMessage = "Next";
 	var enable_next_button = true;
 	
+	var updateBABadgeCount = function(){
+		chrome.bookmarks.getChildren(title_folder_id, function ( results ){
+				chrome.browserAction.setBadgeText( { "text": results.length.toString() } );
+				if( results.length <= 0 ){
+					enable_next_button = false;
+				}else{
+					enable_next_button = true;
+				}
+			});
+	};
+	
+	var set_folder_parent = function(){
+		updateBABadgeCount();
+	};
+	
 	var title_desired = localStorage["queue_folder_name"];
-	if( !title_desired ){
-		title_desired = "Queue";
-		localStorage["queue_folder_name"] = title_desired;
+	var tmp_title_id_hold = localStorage["queue_folder_id"];
+	if( !tmp_title_id_hold ){
+		if( !title_desired ){
+			//console.log( "no old style name either, go ahead and create" );
+			//no old style name either, go ahead and create
+			chrome.bookmarks.getTree( function( results ) {
+				for( var i = 0; i < results[0].children.length; i++ ){
+					//console.log( results[0].children[i].title );
+					if( results[0].children[i].title == "Other bookmarks" ){
+						//console.log( "Go Other bookmarks core: " + results[i].id );
+						chrome.bookmarks.create({'parentId': results[0].children[i].id,
+											'title': 'Browse Queue'},
+										function(newFolder) {
+											localStorage["queue_folder_id"] = newFolder.id;
+											title_folder_id = localStorage["queue_folder_id"];
+											set_folder_parent();
+										});
+					}
+				}
+			});
+		}else{
+			//console.log( "old style found, try to use it" );
+			//old style found, try to use it
+			chrome.bookmarks.getTree( function( results ) {
+				for (var i = 0; i < results.length; i++) {  
+					//console.log( results[i].id + " : " + results[i].title );
+					initial_old_fix_traverse_tree( results[i].children );
+				}
+			});
+			localStorage.removeItem('queue_folder_name');
+		}
+	}else{
+		title_folder_id = localStorage["queue_folder_id"];
+		set_folder_parent();
 	}
-	
-	//console.log( "Startup" );
-	
-	//chrome.browserAction.setBadgeText( { "text": "OFF" } );
 	
 	var en_dis_func = function() {
 			click_ref = !click_ref;
@@ -93,41 +135,20 @@
 	
 	//console.log( "Search bookmarks" );
 	
-	var traverse_tree = function( results ) {
+	var initial_old_fix_traverse_tree = function( results ) {
 		for (var i = 0; i < results.length; i++) {  
-			//console.log( results[i].id + " : " + results[i].title );
 			if( results[i].title == title_desired ){
-				//console.log( "Found with Id: " + results[i].id );
-				title_folder_id = results[i].id;
-				updateBABadgeCount();
+				localStorage["queue_folder_id"] = results[i].id;
+				title_folder_id = localStorage["queue_folder_id"];
+				set_folder_parent();
 				break;
 			}else{
-				chrome.bookmarks.getChildren( results[i].id, traverse_tree );
+				chrome.bookmarks.getChildren( results[i].id, initial_old_fix_traverse_tree );
 			}
 		}
 	}
 	
-	var updateBABadgeCount = function(){
-		chrome.bookmarks.getChildren(title_folder_id, function ( results ){
-				chrome.browserAction.setBadgeText( { "text": results.length.toString() } );
-				if( results.length <= 0 ){
-					enable_next_button = false;
-				}else{
-					enable_next_button = true;
-				}
-			});
-	};
-	
-	var set_folder_parent = function(){
-		chrome.bookmarks.getTree( function( results ) {
-			for (var i = 0; i < results.length; i++) {  
-				//console.log( results[i].id + " : " + results[i].title );
-				traverse_tree( results[i].children );
-			}
-		});
-	};
-	
-	set_folder_parent();
+	//set_folder_parent();
 	//updateBABadgeCount();
 	
 	chrome.tabs.onRemoved.addListener(function(tabId) {
