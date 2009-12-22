@@ -204,6 +204,26 @@
 		ctx2.closePath();
 		ctx2.fill();
 		
+		// Add a listener to the content script can request to.
+		chrome.extension.onRequest.addListener(function(request, sender, response) {
+		  
+		  /*
+		   * Enable / Disable
+		   * 69 + shift Ctrl - Shift - E
+		   */
+		  if( request.shift && (request.code == 69) ){
+			en_dis_func();
+		  }
+		  
+		  /*
+		   * Enable / Disable
+		   * 80 + shift Ctrl - Shift - P
+		   */
+		   if( request.shift && (request.code == 80) ){
+			getNextBookmark();
+		  }
+		});
+		
 		img_dta = ctx.getImageData(0, 0, 19, 19)
 		chrome.browserAction.setIcon( { "imageData": img_dta } );
 	}

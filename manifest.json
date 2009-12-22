@@ -1,6 +1,6 @@
 {
   "name": "Browse Queue",
-  "version": "1.0.0.9",
+  "version": "1.0.1.0",
   "description": "Queue based browsing.",
   "background_page": "bg.html",
   "options_page": "options.html",
@@ -11,5 +11,11 @@
   "browser_action": {
 	"default_title": "Queue Control",
 	"popup": "popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*","https://*/*"],
+      "js": ["keyboard_shortcuts.js"]
+    }
+  ]
 }
