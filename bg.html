@@ -66,13 +66,21 @@
 			click_ref = !click_ref;
 			if( click_ref ){
 				//chrome.browserAction.setBadgeText( { "text": "ON" } );
-				chrome.browserAction.setIcon( { "path": "stack_icon_red.png" } );
+				var ctx2 = document.getElementById("canvas_red").getContext("2d");
+				
+				img_dta = ctx2.getImageData(0, 0, 19, 19)
+				chrome.browserAction.setIcon( { "imageData": img_dta } );
+
 				chrome.tabs.onCreated.addListener( the_on_created_function );
 				chrome.tabs.onUpdated.addListener( the_on_updated_function );
 				EnDisButtonText = "Disable";
 			}else{
 				//chrome.browserAction.setBadgeText( { "text": "OFF" } );
-				chrome.browserAction.setIcon( { "path": "stack_icon_green.png" } );
+				var ctx = document.getElementById("canvas_green").getContext("2d");
+				
+				img_dta = ctx.getImageData(0, 0, 19, 19)
+				chrome.browserAction.setIcon( { "imageData": img_dta } );
+				
 				chrome.tabs.onCreated.removeListener( the_on_created_function );
 				chrome.tabs.onUpdated.removeListener( the_on_updated_function );
 				EnDisButtonText = "Enable";
@@ -155,7 +163,56 @@
 		if( tabId == nav_target_tab_id ) { nav_target_tab_id = -1; }
 	});
 	
+	function init_bg(){
+		//get a reference to the canvas
+		var ctx = document.getElementById("canvas_green").getContext("2d");
+
+		//draw a circle
+		ctx.fillStyle = "#22B14C"
+		ctx.beginPath();
+		ctx.rect(2, 1, 15, 5);
+		ctx.closePath();
+		ctx.fill();
+		
+		ctx.beginPath();
+		ctx.rect(2, 7, 15, 5);
+		ctx.closePath();
+		ctx.fill();
+		
+		ctx.beginPath();
+		ctx.rect(2, 13, 15, 5);
+		ctx.closePath();
+		ctx.fill();
+		
+		//get a reference to the canvas
+		var ctx2 = document.getElementById("canvas_red").getContext("2d");
+
+		//draw a circle
+		ctx2.fillStyle = "#ED1C24"
+		ctx2.beginPath();
+		ctx2.rect(2, 1, 15, 5);
+		ctx2.closePath();
+		ctx2.fill();
+		
+		ctx2.beginPath();
+		ctx2.rect(2, 7, 15, 5);
+		ctx2.closePath();
+		ctx2.fill();
+		
+		ctx2.beginPath();
+		ctx2.rect(2, 13, 15, 5);
+		ctx2.closePath();
+		ctx2.fill();
+		
+		img_dta = ctx.getImageData(0, 0, 19, 19)
+		chrome.browserAction.setIcon( { "imageData": img_dta } );
+	}
+	
 	//console.log( "Registered" );
 </script>
 </head>
+<body onload="init_bg()">
+	<canvas id="canvas_green" width="19" height="19"></canvas>
+	<canvas id="canvas_red" width="19" height="19"></canvas>
+</body>
 </html>
