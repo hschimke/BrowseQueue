@@ -1,3 +1,6 @@
+//  Copyright 2010 Henry A Schimke
+//  See license.txt for details
+
 // Add a keyboard listener on keyup.
 if (window == top) {
   window.addEventListener("keyup", keyListener, false);
