@@ -2,7 +2,7 @@
 //  See license.txt for details
 {
   "name": "Browse Queue",
-  "version": "1.0.1.0",
+  "version": "1.0.1.1",
   "description": "Queue based browsing.",
   "background_page": "bg.html",
   "options_page": "options.html",
