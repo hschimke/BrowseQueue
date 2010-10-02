@@ -165,6 +165,14 @@
 		if( tabId == nav_target_tab_id ) { nav_target_tab_id = -1; }
 	});
 	
+	// Update badge when bookmarks are added or removed
+	chrome.bookmarks.onChanged.addListener( updateBABadgeCount );
+	chrome.bookmarks.onChildrenReordered.addListener( updateBABadgeCount );
+	chrome.bookmarks.onCreated.addListener( updateBABadgeCount );
+	chrome.bookmarks.onImportEnded.addListener( updateBABadgeCount );
+	chrome.bookmarks.onMoved.addListener( updateBABadgeCount );
+	chrome.bookmarks.onRemoved.addListener( updateBABadgeCount );
+	
 	function init_bg(){
 		//get a reference to the canvas
 		var ctx = document.getElementById("canvas_green").getContext("2d");
