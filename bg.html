@@ -177,6 +177,24 @@
 	chrome.bookmarks.onMoved.addListener( updateBABadgeCount );
 	chrome.bookmarks.onRemoved.addListener( updateBABadgeCount );
 	
+	// Configure the context menu option
+	chrome.contextMenus.create(
+	    {
+	        type: 'normal',
+	        title: 'henry',
+	        contexts: ['link'],
+	        onclick: function( info, tab )
+	            {	            
+	                chrome.bookmarks.create(
+						{'parentId': title_folder_id,
+						 'title': info.linkUrl,
+						 'url': info.linkUrl},
+					 function( res ) { 
+						updateBABadgeCount();
+					});
+	            }
+	    } );
+	
 	function init_bg(){
 		//get a reference to the canvas
 		var ctx = document.getElementById("canvas_green").getContext("2d");

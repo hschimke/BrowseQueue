@@ -1,12 +1,12 @@
 {
   "name": "Browse Queue",
-  "version": "1.1.0.1",
+  "version": "1.1.0.2",
   "description": "Queue based browsing.",
   "background_page": "bg.html",
   "options_page": "options.html",
   "icons": { "48": "disp_ico_48.png", "128": "disp_ico_128.png" },
   "permissions": [
-    "bookmarks", "tabs"
+    "bookmarks", "tabs", "contextMenus"
   ],
   "browser_action": {
 	"default_title": "Queue Control",
