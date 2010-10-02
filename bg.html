@@ -106,7 +106,7 @@
 	var the_on_updated_function = function(tabId, changeInfo, tab) { 
 		//console.log( "Id: " + tabId + " Url: " + tab.url );
 		if( page_ids[tabId] != undefined && page_ids[tabId] == true ){
-			if( tab.status == "complete" ){
+			if( tab.status == "loading" ){
 				//console.log( "Ready to create a bookmark with parent " + title_folder_id + " with url " + tab.url );
 				chrome.bookmarks.create(
 							{'parentId': title_folder_id,
