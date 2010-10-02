@@ -165,7 +165,7 @@
 		if( tabId == nav_target_tab_id ) { nav_target_tab_id = -1; }
 	});
 	
-	// Update badge when bookmarks are added or removed
+	// Update badge when bookmarks are added, removed, changed, or re-ordered
 	chrome.bookmarks.onChanged.addListener( updateBABadgeCount );
 	chrome.bookmarks.onChildrenReordered.addListener( updateBABadgeCount );
 	chrome.bookmarks.onCreated.addListener( updateBABadgeCount );
