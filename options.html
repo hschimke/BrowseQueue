@@ -1,14 +1,26 @@
 <html>
 <!--  Copyright 2010 Henry A Schimke
       See license.txt for details -->
-<head><title>Browse Queue Options</title></head>
+<head>
+    <title>Browse Queue Options</title>
+    <style type="text/css">
+        fieldset {
+            width: 50%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
 <script type="text/javascript">
 	// Saves options to localStorage.
 	function save_options_select() {
 	  var folder_select = document.getElementById( "folder_list" );
+	  var quick_click_select = document.getElementById( "use_quick_click_mode_cb" );
 	  
 	  var id_hold = folder_select.options[ folder_select.selectedIndex ].value;
+	  var quick_click_mode = quick_click_select.checked;
+	  
 	  localStorage["queue_folder_id"] = id_hold;
+	  localStorage["use_quick_click_mode"] = quick_click_mode;
 	  
 	  chrome.extension.getBackgroundPage().title_folder_id = id_hold;
 	  chrome.extension.getBackgroundPage().set_folder_parent();
@@ -27,7 +39,6 @@
 		
 		if( results.length == 0 ){
 			restore_options();
-		//	alert("go");
 		}
 	}
 	
@@ -60,7 +71,6 @@
 	
 		for (var i = 0; i < total; i++) {
 			var child = folder_select.options[i];
-			//console.log( "Text: '" + child.text + "' Value: '" + child.value + "' BkMrkId: '" + bkmrk[0].id + "'" );
 			if (child.value == bkmrk[0].id) {
 				child.selected = "true";
 				break;
@@ -79,16 +89,24 @@
 	
 	function start_up(){
 		populate_select();
-		//restore_options();
+		if( localStorage["use_quick_click_mode"] == true || localStorage["use_quick_click_mode"] == 'true' ){
+		    var quick_click_select = document.getElementById( "use_quick_click_mode_cb" );
+		    quick_click_select.checked = true;
+		}
 	}
 
 </script>
 
 <body onload="start_up()">
-	Queue Folder:
-	<br />
-	<select id="folder_list">
-	</select>
-	<button onclick="save_options_select()">Select</button>
+    <fieldset>
+        <legend>Queue Folder</legend>
+	    <select id="folder_list">
+	    </select>
+	</fieldset>
+    <fieldset>
+	    <legend>Icon Mode</legend>
+    	<label for="use_quick_click_mode_cb">Use Quick Click Mode:</label><input type="checkbox" id="use_quick_click_mode_cb" />
+    </fieldset>
+    <button onclick="save_options_select()">Save</button>
 </body>
 </html>

@@ -16,6 +16,20 @@ function startup(){
 	if( !en_n ){
 		document.getElementById( "pn" ).disabled = true;
 	}
+	
+	if( localStorage["use_quick_click_mode"] == true || localStorage["use_quick_click_mode"] == 'true' ){
+	    /**
+	     * Edit by Martin START
+	     */
+	    var click_ref = chrome.extension.getBackgroundPage().click_ref;
+	    if(en_n && !click_ref) {
+		    //directly open next element
+		    queue_pop_function();
+	    }
+	    /**
+	     * Edit by Martin STOP
+	     */
+    }
 }
 </script>
 
