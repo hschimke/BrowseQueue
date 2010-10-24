@@ -1,21 +1,30 @@
 {
-  "name": "Browse Queue",
-  "version": "1.1.1.1",
-  "description": "Queue based browsing.",
-  "background_page": "bg.html",
-  "options_page": "options.html",
-  "icons": { "48": "disp_ico_48.png", "128": "disp_ico_128.png" },
-  "permissions": [
-    "bookmarks", "tabs", "contextMenus"
-  ],
-  "browser_action": {
-	"default_title": "Queue Control",
-	"default_popup": "popup.html"
-  },
-  "content_scripts": [
-    {
-      "matches": ["http://*/*","https://*/*"],
-      "js": ["keyboard_shortcuts.js"]
-    }
-  ]
+    "name": "Browse Queue",
+    "version": "1.1.1.2",
+    "description": "Queue based browsing.",
+    "background_page": "bg.html",
+    "options_page": "options.html",
+    "icons": {
+        "16": "images/disp_ico_16.png",
+        "48": "images/disp_ico_48.png",
+        "128": "images/disp_ico_128.png"
+    },
+    "permissions": [
+        "bookmarks",
+        "tabs",
+        "contextMenus"
+    ],
+    "browser_action": {
+        "default_title": "Queue Control",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "js": ["keyboard_shortcuts.js"]
+        }
+    ]
 }
