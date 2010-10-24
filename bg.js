@@ -1,10 +1,10 @@
 var click_ref = false;
-var mg = "Tab Catch is enabled: ";
+var mg = chrome.i18n.getMessage("bg_mg_text");
 var page_ids = new Array();
 var title_folder_id = -1;
 var nav_target_tab_id = -1;
-var EnDisButtonText = "Enable";
-var NextButtonMessage = "Next";
+var EnDisButtonText = chrome.i18n.getMessage("enable_button_text");
+var NextButtonMessage = chrome.i18n.getMessage("next_button_text");
 var enable_next_button = true;
 
 var updateBABadgeCount = function(){

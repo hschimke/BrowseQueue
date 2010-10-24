@@ -1,0 +1,30 @@
+{
+    "extension_name": {
+        "message": "Browse Queue",
+        "description": "The name of the extension"
+    },
+    "extension_description": {
+        "message": "Queue based browsing",
+        "description": "What the extension does"
+    },
+    "options_page_title": {
+        "message": "Browse Queue Options",
+        "description": "Title for extension options page"
+    },
+    "browser_action_tooltip": {
+        "message": "Queue Control",
+        "description": "Tooltip for the queue toolbar button"
+    },
+    "enable_button_text": {
+        "message": "Enable",
+        "description": "Text for button to enable/disable new tab catching"
+    },
+    "next_button_text": {
+        "message": "Next",
+        "description": "Text for button to advance to the next item in view mode"
+    },
+    "bg_mg_text": {
+        "message": "Tab Catch is enabled: ",
+        "description": "Log message for background page"
+    }
+}

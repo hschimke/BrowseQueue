@@ -1,9 +1,10 @@
 {
-    "name": "Browse Queue",
-    "version": "1.1.1.2",
-    "description": "Queue based browsing.",
+    "name": "__MSG_extension_name__",
+    "version": "1.1.1.3",
+    "description": "__MSG_extension_description__",
     "background_page": "bg.html",
     "options_page": "options.html",
+    "default_locale": "en",
     "icons": {
         "16": "images/disp_ico_16.png",
         "48": "images/disp_ico_48.png",
@@ -15,7 +16,7 @@
         "contextMenus"
     ],
     "browser_action": {
-        "default_title": "Queue Control",
+        "default_title": "__MSG_browser_action_tooltip__",
         "default_popup": "popup.html"
     },
     "content_scripts": [
