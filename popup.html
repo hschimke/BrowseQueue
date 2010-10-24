@@ -12,14 +12,15 @@
 
       See license.txt for details -->
 <head>
+    <script src="jquery-1.4.3.min.js" type="text/javascript"></script>
     <script src="popup.js" type="text/javascript"></script>
 </head>
-<body onload="startup()">
+<body>
 <div>
-	<button onClick="enable_disable_function();" id="enab_disab">
+	<button id="enable-disable-button">
 		<span><script>document.write( chrome.extension.getBackgroundPage().EnDisButtonText );</script></span>
 	</button>
-	<button onClick="queue_pop_function();" id="pn">
+	<button id="next-button">
 		<span><script>document.write( chrome.extension.getBackgroundPage().NextButtonMessage );</script></span>
 	</button>
 </div>

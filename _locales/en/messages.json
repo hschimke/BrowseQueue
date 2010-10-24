@@ -17,14 +17,14 @@
     },
     "enable_button_text": {
         "message": "Enable",
-        "description": "Text for button to enable/disable new tab catching"
+        "description": "Text for button to enable new tab catching"
+    },
+    "disable_button_text": {
+        "message": "Disable",
+        "description": "Text for button to disable new tab catching"
     },
     "next_button_text": {
         "message": "Next",
         "description": "Text for button to advance to the next item in view mode"
-    },
-    "bg_mg_text": {
-        "message": "Tab Catch is enabled: ",
-        "description": "Log message for background page"
     }
 }
