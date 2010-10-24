@@ -1,0 +1,17 @@
+fieldset {
+    width: 50%;
+    margin-bottom: 20px;
+}
+
+.credits {
+    color: #7f7f7f;
+}
+
+.credits, .standard-license {
+    font-family: monospace;
+}
+
+.standard-license {
+    color: #5f5f5f;
+    border-top: 1px dashed #7f7f7f;
+}
