@@ -1,10 +1,10 @@
 {
-    "name": "__MSG_name__",
+    "name": "__MSG_extName__",
     "version": "1.1.1.5",
     "description": "__MSG_extension_description__",
     "background_page": "bg.html",
     "options_page": "options.html",
-    "default_locale": "en",
+    "default_locale": "en_US",
     "icons": {
         "16": "images/disp_ico_16.png",
         "48": "images/disp_ico_48.png",

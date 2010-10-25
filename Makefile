@@ -43,7 +43,7 @@ $(manifest) : locales | $(BUILDDIR)
 	cp $@ $(BUILDDIR)/$@
 
 locales : | $(LOCALESBUILDDIR)
-	cp --recursive $(LOCALESDIR)/ $(LOCALESBUILDDIR)/
+	cp --recursive $(LOCALESDIR)/ $(BUILDDIR)/ #$(LOCALESBUILDDIR)/
 
 .PHONY : clean
 clean :

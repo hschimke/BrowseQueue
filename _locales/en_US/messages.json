@@ -1,5 +1,5 @@
 {
-    "name": {
+    "extName": {
         "message": "Browse Queue",
         "description": "The name of the extension"
     },
