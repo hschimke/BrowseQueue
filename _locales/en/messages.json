@@ -1,5 +1,5 @@
 {
-    "extension_name": {
+    "name": {
         "message": "Browse Queue",
         "description": "The name of the extension"
     },
