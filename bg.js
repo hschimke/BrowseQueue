@@ -134,6 +134,50 @@ function draw_icon_box( color, target_id ) {
 	return icn;
 }
 
+/**
+ * Check if a key matches a keyboard event object
+ * @param {Object} event Keyboard event
+ * @param {String} target_value String shortname
+ * @return True if matches
+*/
+function check_for_key_binding_slot( event, target_value ){
+    var matches = false;
+    switch( target_value ){
+        case "ctrl":
+            if( event.ctrl ) {
+                matches = true;
+            }
+            break;
+        case "shift":
+            if( event.shift ) {
+                matches = true;
+            }
+            break;
+        case "alt":
+            if( event.alt ) {
+                matches = true;
+            }
+            break;
+        case "none":
+            var ctr = 0;
+            if( event.ctrl ) {
+                ctr++;
+            }
+            if( event.shift ) {
+                ctr++;
+            }
+            if( event.alt ) {
+                ctr++;
+            }
+            if( ctr <= 1 ){
+                matches = true;
+            }
+            break;
+    }
+    
+    return matches;
+}
+
 function init_bg(){
 	//get a reference to the green (disabeled) canvas
 	var ctx = draw_icon_box( "#22B14C", "#canvas-green" );
@@ -144,19 +188,33 @@ function init_bg(){
 	// Add a listener which the content script can request to.
 	chrome.extension.onRequest.addListener(
 	    function(request, sender, response) {
+            var kb_a_mod_1 = localStorage.getItem("kb_a_mod_1");
+            var kb_a_mod_2 = localStorage.getItem("kb_a_mod_2");
+            var kb_a_key = localStorage.getItem("kb_a_key");
+            
+            var kb_b_mod_1 = localStorage.getItem("kb_b_mod_1");
+            var kb_b_mod_2 = localStorage.getItem("kb_b_mod_2");
+            var kb_b_key = localStorage.getItem("kb_b_key");
+            
+            var mod_a1 = check_for_key_binding_slot( request, kb_a_mod_1 );
+            var mod_a2 = check_for_key_binding_slot( request, kb_a_mod_2 );
+            var kb_a_key = (kb_a_key.charCodeAt(0) == request.code);
+            
+            var mod_b1 = check_for_key_binding_slot( request, kb_b_mod_1 );
+            var mod_b2 = check_for_key_binding_slot( request, kb_b_mod_2 );
+            var kb_b_key = (kb_b_key.charCodeAt(0) == request.code);
+            
             /*
              * Enable / Disable
-             * 69 + shift Ctrl - Shift - E
              */
-            if( request.shift && (request.code == 69) ){
+            if( mod_a1 && mod_a2 && kb_a_key ){
                 en_dis_func();
             }
 
             /*
              * Enable / Disable
-             * 80 + shift Ctrl - Shift - P
              */
-            if( request.shift && (request.code == 80) ){
+            if( mod_b1 && mod_b2 && kb_b_key ){
                 getNextBookmark();
             }
 	    });
