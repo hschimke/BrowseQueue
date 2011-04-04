@@ -15,3 +15,8 @@ fieldset {
     color: #5f5f5f;
     border-top: 1px dashed #7f7f7f;
 }
+
+.kb-binding-key {
+    width: 50px;
+    text-transform: uppercase;
+}

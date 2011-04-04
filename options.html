@@ -1,5 +1,5 @@
 <html>
-<!--  Copyright 2010 Henry A Schimke
+<!--  Copyright 2011 Henry A Schimke
       See license.txt for details -->
 <head>
     <title>Browse Queue Options</title>
@@ -18,12 +18,64 @@
     	<label for="use-quick-click-mode-cb">Use Quick Click Mode:</label>
     	<input type="checkbox" id="use-quick-click-mode-cb" />
     </fieldset>
+    <fieldset>
+        <legend>Key Bindings</legend>
+        <table>
+            <th>
+                <td>Modifier 1</td>
+                <td>Modifier 2</td>
+                <td>Key</td>
+            </th>
+            <tr>
+                <td>Mode Toggle</td>
+                <td>
+                    <select id="kb-binding-a-mod-1">
+                        <option value="ctrl">Ctrl</option>
+                        <option value="alt">Alt</Option>
+                        <option value="shift">Shift</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="kb-binding-a-mod-2">
+                        <option value="ctrl">Ctrl</option>
+                        <option value="alt">Alt</Option>
+                        <option value="shift">Shift</option>
+                        <option value="none">None</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" id="kb-binding-a-key" maxlength="1" class="kb-binding-key" />
+                </td>
+            </tr>
+            <tr>
+                <td>Advance Queue</td>
+                <td>
+                    <select id="kb-binding-b-mod-1">
+                        <option value="ctrl">Ctrl</option>
+                        <option value="alt">Alt</Option>
+                        <option value="shift">Shift</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="kb-binding-b-mod-2">
+                        <option value="ctrl">Ctrl</option>
+                        <option value="alt">Alt</Option>
+                        <option value="shift">Shift</option>
+                        <option value="none">None</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" id="kb-binding-b-key" maxlength="1" class="kb-binding-key" />
+                </td>
+            </tr>
+        </table>
+    </fieldset>
     <button id="save-button">Save</button>
     <br />
     <br />
     <div class="credits">
         <p>
-            Unless otherwise noted code and layout Copyright 2010 Henry A Schimke.
+            Unless otherwise noted code and layout Copyright 2011 Henry A Schimke.
         </p>
         <p>
             Suggestion for 'loading' event use contributed by Rafał Mikołajczak &lt;rafal.drive@gmail.com&gt;.
@@ -35,7 +87,7 @@
     </div>
     <div class="standard-license">
         <p>
-        Copyright © 2010 Henry A Schimke. All Rights Reserved.
+        Copyright © 2011 Henry A Schimke. All Rights Reserved.
         </p>
         <p>
         Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
