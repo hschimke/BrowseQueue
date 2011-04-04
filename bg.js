@@ -1,4 +1,4 @@
-//  Copyright 2010 Henry A Schimke
+//  Copyright 2011 Henry A Schimke
 //  See license.txt for details
 
 var click_ref = false;
