@@ -10,10 +10,29 @@ function save_options_select() {
 
     localStorage["queue_folder_id"] = id_hold;
     localStorage["use_quick_click_mode"] = quick_click_mode;
+    
+    // Keyboard Bindings
+    var kb_a_mod_1 = $('#kb-binding-a-mod-1 option:selected').val();
+    var kb_a_mod_2 = $('#kb-binding-a-mod-2 option:selected').val();
+    var kb_a_key = $('#kb-binding-a-key').val();
+    
+    var kb_b_mod_1 = $('#kb-binding-b-mod-1 option:selected').val();
+    var kb_b_mod_1 = $('#kb-binding-b-mod-2 option:selected').val();
+    var kb_b_key = $('#kb-binding-b-key').val();
+    
+    localStorage["kb_a_mod_1"] = kb_a_mod_1;
+    localStorage["kb_a_mod_2"] = kb_a_mod_2;
+    localStorage["kb_a_key"] = kb_a_key;
+    
+    localStorage["kb_b_mod_1"] = kb_b_mod_1;
+    localStorage["kb_b_mod_2"] = kb_b_mod_1;
+    localStorage["kb_b_key"] = kb_b_key;
 
+    // Update bg script settings
     chrome.extension.getBackgroundPage().title_folder_id = id_hold;
     chrome.extension.getBackgroundPage().set_folder_parent();
-
+    
+    // Reset folder list drop down
     populate_select();
 }
 
