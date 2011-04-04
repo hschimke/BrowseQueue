@@ -6,7 +6,7 @@ LOCALESBUILDDIR := $(BUILDDIR)/$(LOCALESDIR)
 images := disp_ico_16.png disp_ico_48.png disp_ico_128.png
 static := license.txt
 css := options.css
-js := bg.js  jquery-1.4.3.min.js  keyboard_shortcuts.js  options.js  popup.js
+js := bg.js  jquery-1.5.2.min.js  keyboard_shortcuts.js  options.js  popup.js
 html := bg.html  options.html  popup.html
 manifest := manifest.json
 
