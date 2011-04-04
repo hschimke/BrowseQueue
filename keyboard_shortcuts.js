@@ -1,4 +1,4 @@
-//  Copyright 2010 Henry A Schimke
+//  Copyright 2011 Henry A Schimke
 //  See license.txt for details
 
 // Add a keyboard listener on keyup.
@@ -8,12 +8,12 @@ if (window == top) {
  
 // Keyboard keyup listener callback.
 function keyListener(e) {
-  // Must press ctrl key to validate.
-  if (e.ctrlKey && e.keyCode && !e.metaKey && e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
-	chrome.extension.sendRequest({
-      code: e.keyCode,
-      alt: e.altKey,
-      shift: e.shiftKey
-    });
-  }
+    if (e.keyCode != 16 && e.keyCode != 17 && e.keyCode != 18) {
+                chrome.extension.sendRequest({
+                code: e.keyCode,
+                alt: e.altKey,
+                shift: e.shiftKey,
+                ctrl: e.ctrlKey
+            });
+    }
 }
