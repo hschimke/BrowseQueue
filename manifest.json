@@ -10,7 +10,10 @@
     "action": {
         "default_title": "__MSG_browser_action_tooltip__",
         "default_popup": "popup.html",
-        "default_icon": "images/icon-disabled.svg"
+        "default_icon": {
+            "16": "images/disp_ico_16.png",
+            "48": "images/disp_ico_48.png"
+        }
     },
     "options_ui": {
         "page": "options.html",

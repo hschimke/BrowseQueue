@@ -10,8 +10,7 @@ rm -rf "$OUT"
 mkdir -p "$OUT/images" "$OUT/_locales"
 
 cp manifest.json bg.js popup.html popup.js options.html options.js options.css license.txt "$OUT/"
-cp images/disp_ico_16.png images/disp_ico_48.png images/disp_ico_128.png \
-   images/icon-enabled.svg images/icon-disabled.svg "$OUT/images/"
+cp images/disp_ico_16.png images/disp_ico_48.png images/disp_ico_128.png "$OUT/images/"
 cp -R _locales/ "$OUT/_locales/"
 
 cd "$OUT"

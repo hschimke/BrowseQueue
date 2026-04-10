@@ -68,9 +68,13 @@ async function updateBadge() {
 }
 
 function updateIcon(enabled) {
-    chrome.action.setIcon({
-        path: enabled ? 'images/icon-enabled.svg' : 'images/icon-disabled.svg'
-    });
+    const canvas = new OffscreenCanvas(19, 19);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = enabled ? '#ED1C24' : '#22B14C';
+    ctx.fillRect(2, 1, 15, 5);
+    ctx.fillRect(2, 7, 15, 5);
+    ctx.fillRect(2, 13, 15, 5);
+    chrome.action.setIcon({ imageData: ctx.getImageData(0, 0, 19, 19) });
 }
 
 async function onCommand(command) {
