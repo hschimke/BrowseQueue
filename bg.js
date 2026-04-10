@@ -8,20 +8,22 @@
 const pendingTabs = new Map();
 
 // All listeners must be registered synchronously at the top level in MV3.
-chrome.runtime.onInstalled.addListener(onInstalled);
-chrome.commands.onCommand.addListener(onCommand);
-chrome.tabs.onCreated.addListener(onTabCreated);
-chrome.tabs.onUpdated.addListener(onTabUpdated);
-chrome.tabs.onRemoved.addListener(onTabRemoved);
-chrome.bookmarks.onChanged.addListener(updateBadge);
-chrome.bookmarks.onChildrenReordered.addListener(updateBadge);
-chrome.bookmarks.onCreated.addListener(updateBadge);
-chrome.bookmarks.onImportEnded.addListener(updateBadge);
-chrome.bookmarks.onMoved.addListener(updateBadge);
-chrome.bookmarks.onRemoved.addListener(updateBadge);
-chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
+chrome.runtime.onInstalled.addListener((...a) => onInstalled(...a).catch(console.error));
+chrome.commands.onCommand.addListener((...a) => onCommand(...a).catch(console.error));
+chrome.tabs.onCreated.addListener((...a) => onTabCreated(...a).catch(console.error));
+chrome.tabs.onUpdated.addListener((...a) => onTabUpdated(...a).catch(console.error));
+chrome.tabs.onRemoved.addListener((...a) => onTabRemoved(...a).catch(console.error));
+chrome.bookmarks.onChanged.addListener(() => updateBadge().catch(console.error));
+chrome.bookmarks.onChildrenReordered.addListener(() => updateBadge().catch(console.error));
+chrome.bookmarks.onCreated.addListener(() => updateBadge().catch(console.error));
+chrome.bookmarks.onImportEnded.addListener(() => updateBadge().catch(console.error));
+chrome.bookmarks.onMoved.addListener(() => updateBadge().catch(console.error));
+chrome.bookmarks.onRemoved.addListener(() => updateBadge().catch(console.error));
+chrome.contextMenus.onClicked.addListener((...a) => onContextMenuClicked(...a).catch(console.error));
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    handleMessage(message).then(sendResponse);
+    handleMessage(message)
+        .then(sendResponse)
+        .catch(err => sendResponse({ error: err.message ?? String(err) }));
     return true; // keep message channel open for async response
 });
 
@@ -95,20 +97,24 @@ async function advanceQueue() {
     if (children.length === 0) return;
 
     const next = children[0];
-    const targetId = nav_target_tab_id ?? -1;
+    const targetId = nav_target_tab_id ?? null;
 
-    if (targetId === -1) {
-        const tab = await chrome.tabs.create({ url: next.url });
-        // Mark this tab so onTabCreated/onTabUpdated don't intercept it.
-        // Setting before onTabCreated fires is safe: chrome.tabs.create's
-        // promise resolves before the event fires in the same SW context.
-        pendingTabs.set(tab.id, false);
-        await chrome.storage.local.set({ nav_target_tab_id: tab.id });
-    } else {
-        await chrome.tabs.update(targetId, { url: next.url });
+    try {
+        if (targetId === null) {
+            const tab = await chrome.tabs.create({ url: next.url });
+            // Mark this tab so onTabCreated/onTabUpdated don't intercept it.
+            // Setting before onTabCreated fires is safe: chrome.tabs.create's
+            // promise resolves before the event fires in the same SW context.
+            pendingTabs.set(tab.id, false);
+            await chrome.storage.local.set({ nav_target_tab_id: tab.id });
+        } else {
+            await chrome.tabs.update(targetId, { url: next.url });
+        }
+        await chrome.bookmarks.remove(next.id);
+    } catch (err) {
+        console.error('advanceQueue failed:', err);
+        return;
     }
-
-    await chrome.bookmarks.remove(next.id);
     await updateBadge();
 }
 
@@ -135,14 +141,14 @@ async function onTabUpdated(tabId, changeInfo, tab) {
     });
 
     pendingTabs.set(tabId, false);
-    chrome.tabs.remove(tabId);
+    await chrome.tabs.remove(tabId).catch(console.error);
     await updateBadge();
 }
 
 async function onTabRemoved(tabId) {
     const { nav_target_tab_id } = await chrome.storage.local.get('nav_target_tab_id');
     if (tabId === nav_target_tab_id) {
-        await chrome.storage.local.set({ nav_target_tab_id: -1 });
+        await chrome.storage.local.set({ nav_target_tab_id: null });
     }
     pendingTabs.delete(tabId);
 }
