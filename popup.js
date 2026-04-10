@@ -1,50 +1,33 @@
-//  Copyright 2011 Henry A Schimke
-//  See license.txt for details
+// Copyright 2011-2026 Henry A Schimke
+// See license.txt for details
 
-/**
- * Handle enable/disable button click by calling to background page function
- */
-function enable_disable_function() {
-	chrome.extension.getBackgroundPage().en_dis_func();
-	window.close();
-}
+document.addEventListener('DOMContentLoaded', async () => {
+    const toggleBtn = document.getElementById('toggle-button');
+    const nextBtn = document.getElementById('next-button');
 
-/**
- * Handle next button click by calling the background page function
- */
-function queue_pop_function() { 
-	chrome.extension.getBackgroundPage().getNextBookmark();
-	window.close();
-}
+    const state = await chrome.runtime.sendMessage({ type: 'get-state' });
 
-/**
- * Initialize the popup
- */
-function startup(){
-	var en_n = chrome.extension.getBackgroundPage().enable_next_button;
-	if( !en_n ){
-	    $('#next-button').attr( 'disabled', true );
-	}
-	
-	if( localStorage["use_quick_click_mode"] == true || localStorage["use_quick_click_mode"] == 'true' ){
-	    // #Martin_Weik -- Begin
-	    var click_ref = chrome.extension.getBackgroundPage().click_ref;
-	    if(en_n && !click_ref) {
-		    //directly open next element
-		    queue_pop_function();
-	    }
-	    // #Martin_Weik -- End
+    toggleBtn.textContent = state.enabled
+        ? chrome.i18n.getMessage('disable_button_text')
+        : chrome.i18n.getMessage('enable_button_text');
+
+    nextBtn.textContent = chrome.i18n.getMessage('next_button_text');
+    nextBtn.disabled = state.queueEmpty;
+
+    // Quick click mode: if the queue has items and capture is off, auto-advance.
+    if (state.useQuickClick && !state.queueEmpty && !state.enabled) {
+        await chrome.runtime.sendMessage({ type: 'advance' });
+        window.close();
+        return;
     }
-}
 
-$(function() {
-    startup();
-    $('#enable-disable-button').click(
-        function() {
-            enable_disable_function();
-        } );
-    $('#next-button').click( 
-        function() {
-            queue_pop_function();
-        } );
+    toggleBtn.addEventListener('click', async () => {
+        await chrome.runtime.sendMessage({ type: 'toggle' });
+        window.close();
+    });
+
+    nextBtn.addEventListener('click', async () => {
+        await chrome.runtime.sendMessage({ type: 'advance' });
+        window.close();
+    });
 });
