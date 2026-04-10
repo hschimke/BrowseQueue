@@ -109,6 +109,12 @@ kbd {
     color: #3c4043;
 }
 
+code {
+    font-family: monospace;
+    font-size: 13px;
+    color: #3c4043;
+}
+
 a {
     color: #1a73e8;
     text-decoration: none;

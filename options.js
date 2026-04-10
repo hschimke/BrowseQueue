@@ -32,11 +32,6 @@ async function saveOptions() {
     const folderId = document.getElementById('folder-list').value;
     const quickClick = document.getElementById('use-quick-click-mode-cb').checked;
 
-    await chrome.storage.local.set({
-        queue_folder_id: folderId,
-        use_quick_click_mode: quickClick
-    });
-
     await chrome.runtime.sendMessage({ type: 'set-folder', folderId });
     await chrome.runtime.sendMessage({ type: 'set-quick-click', value: quickClick });
 

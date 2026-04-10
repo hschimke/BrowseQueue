@@ -134,6 +134,11 @@ async function onTabUpdated(tabId, changeInfo, tab) {
     const { queue_folder_id } = await chrome.storage.local.get('queue_folder_id');
     if (!queue_folder_id) return;
 
+    if (!tab.url || !/^https?:/.test(tab.url)) {
+        pendingTabs.set(tabId, false);
+        return;
+    }
+
     await chrome.bookmarks.create({
         parentId: queue_folder_id,
         title: tab.title || tab.url,
