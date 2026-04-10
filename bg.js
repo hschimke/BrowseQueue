@@ -1,288 +1,200 @@
-//  Copyright 2011 Henry A Schimke
-//  See license.txt for details
+// Copyright 2011-2026 Henry A Schimke
+// See license.txt for details
 
-var click_ref = false;
-var page_ids = new Array();
-var title_folder_id = -1;
-var nav_target_tab_id = -1;
-var EnDisButtonText = chrome.i18n.getMessage("enable_button_text");
-var NextButtonMessage = chrome.i18n.getMessage("next_button_text");
-var enable_next_button = true;
-var title_desired = localStorage["queue_folder_name"];
-var tmp_title_id_hold = localStorage["queue_folder_id"];
+// Tracks which tabs should be intercepted by the queue.
+// true = intercept this tab when it loads; false = let it load normally.
+// Module-level: survives within a service worker session but not across restarts,
+// which is appropriate since tab IDs don't survive browser restarts either.
+const pendingTabs = new Map();
 
-function updateBABadgeCount() {
-	chrome.bookmarks.getChildren(title_folder_id, function ( results ){
-			chrome.browserAction.setBadgeText( { "text": results.length.toString() } );
-			if( results.length <= 0 ){
-				enable_next_button = false;
-			}else{
-				enable_next_button = true;
-			}
-		});
-}
+// All listeners must be registered synchronously at the top level in MV3.
+chrome.runtime.onInstalled.addListener(onInstalled);
+chrome.commands.onCommand.addListener(onCommand);
+chrome.tabs.onCreated.addListener(onTabCreated);
+chrome.tabs.onUpdated.addListener(onTabUpdated);
+chrome.tabs.onRemoved.addListener(onTabRemoved);
+chrome.bookmarks.onChanged.addListener(updateBadge);
+chrome.bookmarks.onChildrenReordered.addListener(updateBadge);
+chrome.bookmarks.onCreated.addListener(updateBadge);
+chrome.bookmarks.onImportEnded.addListener(updateBadge);
+chrome.bookmarks.onMoved.addListener(updateBadge);
+chrome.bookmarks.onRemoved.addListener(updateBadge);
+chrome.contextMenus.onClicked.addListener(onContextMenuClicked);
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    handleMessage(message).then(sendResponse);
+    return true; // keep message channel open for async response
+});
 
-function set_folder_parent() {
-	updateBABadgeCount();
-}
-
-function en_dis_func() {
-	click_ref = !click_ref;
-	if( click_ref ){
-		var ctx2 = $("#canvas-red")[0].getContext("2d");
-		
-		img_dta = ctx2.getImageData(0, 0, 19, 19)
-		chrome.browserAction.setIcon( { "imageData": img_dta } );
-
-		chrome.tabs.onCreated.addListener( the_on_created_function );
-		chrome.tabs.onUpdated.addListener( the_on_updated_function );
-		EnDisButtonText = chrome.i18n.getMessage("disable_button_text");
-	}else{
-		var ctx = $("#canvas-green")[0].getContext("2d");
-		
-		img_dta = ctx.getImageData(0, 0, 19, 19)
-		chrome.browserAction.setIcon( { "imageData": img_dta } );
-		
-		chrome.tabs.onCreated.removeListener( the_on_created_function );
-		chrome.tabs.onUpdated.removeListener( the_on_updated_function );
-		EnDisButtonText = chrome.i18n.getMessage("enable_button_text");
-	}
-}
-
-function the_on_created_function(tab) { 
-	if( tab.url.indexOf('chrome://') != -1 ){
-	}else{
-		if( page_ids[tab.id] == false ) {
-		}else{
-			page_ids[tab.id] = true;
-		}
-	}
-}
-
-function the_on_updated_function(tabId, changeInfo, tab) { 
-	if( page_ids[tabId] != undefined && page_ids[tabId] == true ){
-		if( tab.status == "loading" ){
-			chrome.bookmarks.create(
-						{'parentId': title_folder_id,
-						 'title': tab.title,
-						 'url': tab.url},
-					 function( res ) { 
-						updateBABadgeCount();
-					});
-			page_ids[tabId] = false;
-			chrome.tabs.remove( tabId );
-		}else{
-		}
-	}
-}
-
-function getNextBookmark() {
-	chrome.bookmarks.getChildren( title_folder_id, function( results ) {
-		if( results.length > 0 ){
-			if( nav_target_tab_id == -1 ){
-				chrome.tabs.create({'url':results[0].url}, function( tab ) {
-					page_ids[tab.id] = false;
-					nav_target_tab_id = tab.id;
-				});
-			}else{
-				chrome.tabs.update(nav_target_tab_id, {'url':results[0].url} );
-			}
-			chrome.bookmarks.remove( results[0].id, function() { updateBABadgeCount(); } );
-		}
-	});
-}
-
-function initial_old_fix_traverse_tree( results ) {
-	for (var i = 0; i < results.length; i++) {  
-		if( results[i].title == title_desired ){
-			localStorage["queue_folder_id"] = results[i].id;
-			title_folder_id = localStorage["queue_folder_id"];
-			set_folder_parent();
-			break;
-		}else{
-			chrome.bookmarks.getChildren( results[i].id, initial_old_fix_traverse_tree );
-		}
-	}
-}
-
-/**
- * Draw a basic icon for the browser action
- * @param {String} color Color to fill the bars with
- * @param {String} target_id jQuery compatible id to select canvas element
- * @return An canvas object containing an icon
- */
-function draw_icon_box( color, target_id ) {
-    var icn = $(target_id)[0].getContext("2d");
-
-	//draw a circle
-	icn.fillStyle = color;
-	icn.beginPath();
-	icn.rect(2, 1, 15, 5);
-	icn.closePath();
-	icn.fill();
-	
-	icn.beginPath();
-	icn.rect(2, 7, 15, 5);
-	icn.closePath();
-	icn.fill();
-	
-	icn.beginPath();
-	icn.rect(2, 13, 15, 5);
-	icn.closePath();
-	icn.fill();
-	
-	return icn;
-}
-
-/**
- * Check if a key matches a keyboard event object
- * @param {Object} event Keyboard event
- * @param {String} target_value String shortname
- * @return True if matches
-*/
-function check_for_key_binding_slot( event, target_value ){
-    var matches = false;
-    switch( target_value ){
-        case "ctrl":
-            if( event.ctrl ) {
-                matches = true;
-            }
-            break;
-        case "shift":
-            if( event.shift ) {
-                matches = true;
-            }
-            break;
-        case "alt":
-            if( event.alt ) {
-                matches = true;
-            }
-            break;
-        case "none":
-            var ctr = 0;
-            if( event.ctrl ) {
-                ctr++;
-            }
-            if( event.shift ) {
-                ctr++;
-            }
-            if( event.alt ) {
-                ctr++;
-            }
-            if( ctr <= 1 ){
-                matches = true;
-            }
-            break;
-    }
-    
-    return matches;
-}
-
-function init_bg(){
-	//get a reference to the green (disabeled) canvas
-	var ctx = draw_icon_box( "#22B14C", "#canvas-green" );
-
-	//get a reference to the red (enabeled) canvas
-	var ctx2 = draw_icon_box( "#ED1C24", "#canvas-red" );
-
-	// Add a listener which the content script can request to.
-	chrome.extension.onRequest.addListener(
-	    function(request, sender, response) {
-            var kb_a_mod_1 = localStorage.getItem("kb_a_mod_1");
-            var kb_a_mod_2 = localStorage.getItem("kb_a_mod_2");
-            var kb_a_key = localStorage.getItem("kb_a_key");
-            
-            var kb_b_mod_1 = localStorage.getItem("kb_b_mod_1");
-            var kb_b_mod_2 = localStorage.getItem("kb_b_mod_2");
-            var kb_b_key = localStorage.getItem("kb_b_key");
-            
-            var mod_a1 = check_for_key_binding_slot( request, kb_a_mod_1 );
-            var mod_a2 = check_for_key_binding_slot( request, kb_a_mod_2 );
-            var kb_a_key = (kb_a_key.charCodeAt(0) == request.code);
-            
-            var mod_b1 = check_for_key_binding_slot( request, kb_b_mod_1 );
-            var mod_b2 = check_for_key_binding_slot( request, kb_b_mod_2 );
-            var kb_b_key = (kb_b_key.charCodeAt(0) == request.code);
-            
-            /*
-             * Enable / Disable
-             */
-            if( mod_a1 && mod_a2 && kb_a_key ){
-                en_dis_func();
-            }
-
-            /*
-             * Enable / Disable
-             */
-            if( mod_b1 && mod_b2 && kb_b_key ){
-                getNextBookmark();
-            }
-	    });
-	
-	img_dta = ctx.getImageData(0, 0, 19, 19)
-	chrome.browserAction.setIcon( { "imageData": img_dta } );
-}
-
-$(document).ready(function() {
-    init_bg();
-
-    if( !tmp_title_id_hold ){
-	    if( !title_desired ){
-		    //no old style name either, go ahead and create
-		    chrome.bookmarks.getTree( function( results ) {
-			    for( var i = 0; i < results[0].children.length; i++ ){
-				    if( results[0].children[i].title == "Other bookmarks" ){
-					    chrome.bookmarks.create({'parentId': results[0].children[i].id,
-										    'title': 'Browse Queue'},
-									    function(newFolder) {
-										    localStorage["queue_folder_id"] = newFolder.id;
-										    title_folder_id = localStorage["queue_folder_id"];
-										    set_folder_parent();
-									    });
-				    }
-			    }
-		    });
-	    }else{
-		    //old style found, try to use it
-		    chrome.bookmarks.getTree( function( results ) {
-			    for (var i = 0; i < results.length; i++) {  
-				    initial_old_fix_traverse_tree( results[i].children );
-			    }
-		    });
-		    localStorage.removeItem('queue_folder_name');
-	    }
-    }else{
-	    title_folder_id = localStorage["queue_folder_id"];
-	    set_folder_parent();
-    }
-
-    chrome.tabs.onRemoved.addListener(function(tabId) {
-	    if( tabId == nav_target_tab_id ) { nav_target_tab_id = -1; }
+async function onInstalled() {
+    chrome.contextMenus.create({
+        id: 'queue-link',
+        type: 'normal',
+        title: 'Queue Link',
+        contexts: ['link']
     });
 
-    // Update badge when bookmarks are added, removed, changed, or re-ordered
-    chrome.bookmarks.onChanged.addListener( updateBABadgeCount );
-    chrome.bookmarks.onChildrenReordered.addListener( updateBABadgeCount );
-    chrome.bookmarks.onCreated.addListener( updateBABadgeCount );
-    chrome.bookmarks.onImportEnded.addListener( updateBABadgeCount );
-    chrome.bookmarks.onMoved.addListener( updateBABadgeCount );
-    chrome.bookmarks.onRemoved.addListener( updateBABadgeCount );
+    const { queue_folder_id } = await chrome.storage.local.get('queue_folder_id');
+    if (!queue_folder_id) {
+        await createDefaultFolder();
+    }
 
-    // Configure the context menu option
-    chrome.contextMenus.create(
-        {
-            type: 'normal',
-            title: 'Queue Link',
-            contexts: ['link'],
-            onclick: function( info, tab )
-                {	            
-                    chrome.bookmarks.create(
-				        {'parentId': title_folder_id,
-				         'title': info.linkUrl,
-				         'url': info.linkUrl},
-			         function( res ) { 
-				        updateBABadgeCount();
-			        });
-                }
-        } );
-} );
+    updateIcon(false);
+    await updateBadge();
+}
+
+async function createDefaultFolder() {
+    const [root] = await chrome.bookmarks.getTree();
+    const otherBookmarks = root.children.find(c => c.title === 'Other bookmarks')
+        ?? root.children.find(c => c.id === '2')
+        ?? root.children[0];
+
+    const folder = await chrome.bookmarks.create({
+        parentId: otherBookmarks.id,
+        title: 'Browse Queue'
+    });
+    await chrome.storage.local.set({ queue_folder_id: folder.id });
+}
+
+async function updateBadge() {
+    const { queue_folder_id } = await chrome.storage.local.get('queue_folder_id');
+    if (!queue_folder_id) {
+        chrome.action.setBadgeText({ text: '' });
+        return;
+    }
+    const children = await chrome.bookmarks.getChildren(queue_folder_id);
+    chrome.action.setBadgeText({ text: children.length > 0 ? children.length.toString() : '' });
+}
+
+function updateIcon(enabled) {
+    chrome.action.setIcon({
+        path: enabled ? 'images/icon-enabled.svg' : 'images/icon-disabled.svg'
+    });
+}
+
+async function onCommand(command) {
+    if (command === 'toggle-queue') {
+        await toggleQueue();
+    } else if (command === 'advance-queue') {
+        await advanceQueue();
+    }
+}
+
+async function toggleQueue() {
+    const { queue_enabled } = await chrome.storage.local.get('queue_enabled');
+    const newState = !queue_enabled;
+    await chrome.storage.local.set({ queue_enabled: newState });
+    updateIcon(newState);
+}
+
+async function advanceQueue() {
+    const { queue_folder_id, nav_target_tab_id } =
+        await chrome.storage.local.get(['queue_folder_id', 'nav_target_tab_id']);
+    if (!queue_folder_id) return;
+
+    const children = await chrome.bookmarks.getChildren(queue_folder_id);
+    if (children.length === 0) return;
+
+    const next = children[0];
+    const targetId = nav_target_tab_id ?? -1;
+
+    if (targetId === -1) {
+        const tab = await chrome.tabs.create({ url: next.url });
+        // Mark this tab so onTabCreated/onTabUpdated don't intercept it.
+        // Setting before onTabCreated fires is safe: chrome.tabs.create's
+        // promise resolves before the event fires in the same SW context.
+        pendingTabs.set(tab.id, false);
+        await chrome.storage.local.set({ nav_target_tab_id: tab.id });
+    } else {
+        await chrome.tabs.update(targetId, { url: next.url });
+    }
+
+    await chrome.bookmarks.remove(next.id);
+    await updateBadge();
+}
+
+async function onTabCreated(tab) {
+    const { queue_enabled } = await chrome.storage.local.get('queue_enabled');
+    if (!queue_enabled) return;
+    if (tab.url && tab.url.startsWith('chrome://')) return;
+    if (pendingTabs.get(tab.id) === false) return; // our navigation tab
+
+    pendingTabs.set(tab.id, true);
+}
+
+async function onTabUpdated(tabId, changeInfo, tab) {
+    if (changeInfo.status !== 'loading') return;
+    if (pendingTabs.get(tabId) !== true) return;
+
+    const { queue_folder_id } = await chrome.storage.local.get('queue_folder_id');
+    if (!queue_folder_id) return;
+
+    await chrome.bookmarks.create({
+        parentId: queue_folder_id,
+        title: tab.title || tab.url,
+        url: tab.url
+    });
+
+    pendingTabs.set(tabId, false);
+    chrome.tabs.remove(tabId);
+    await updateBadge();
+}
+
+async function onTabRemoved(tabId) {
+    const { nav_target_tab_id } = await chrome.storage.local.get('nav_target_tab_id');
+    if (tabId === nav_target_tab_id) {
+        await chrome.storage.local.set({ nav_target_tab_id: -1 });
+    }
+    pendingTabs.delete(tabId);
+}
+
+async function onContextMenuClicked(info) {
+    const { queue_folder_id } = await chrome.storage.local.get('queue_folder_id');
+    if (!queue_folder_id) return;
+
+    await chrome.bookmarks.create({
+        parentId: queue_folder_id,
+        title: info.linkUrl,
+        url: info.linkUrl
+    });
+    await updateBadge();
+}
+
+async function handleMessage(message) {
+    switch (message.type) {
+        case 'get-state': {
+            const data = await chrome.storage.local.get([
+                'queue_enabled', 'queue_folder_id', 'use_quick_click_mode'
+            ]);
+            let queueEmpty = true;
+            if (data.queue_folder_id) {
+                const children = await chrome.bookmarks.getChildren(data.queue_folder_id);
+                queueEmpty = children.length === 0;
+            }
+            return {
+                enabled: !!data.queue_enabled,
+                queueEmpty,
+                useQuickClick: !!data.use_quick_click_mode
+            };
+        }
+        case 'toggle': {
+            await toggleQueue();
+            const { queue_enabled } = await chrome.storage.local.get('queue_enabled');
+            return { enabled: !!queue_enabled };
+        }
+        case 'advance': {
+            await advanceQueue();
+            return { success: true };
+        }
+        case 'set-folder': {
+            await chrome.storage.local.set({ queue_folder_id: message.folderId });
+            await updateBadge();
+            return { success: true };
+        }
+        case 'set-quick-click': {
+            await chrome.storage.local.set({ use_quick_click_mode: message.value });
+            return { success: true };
+        }
+        default:
+            return { error: 'unknown message type' };
+    }
+}
