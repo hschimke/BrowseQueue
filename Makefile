@@ -3,18 +3,18 @@ IMGDIR := images
 LOCALESDIR := _locales
 IMGBUILDDIR := $(BUILDDIR)/$(IMGDIR)
 LOCALESBUILDDIR := $(BUILDDIR)/$(LOCALESDIR)
-images := disp_ico_16.png disp_ico_48.png disp_ico_128.png
+images := disp_ico_16.png disp_ico_48.png disp_ico_128.png icon-enabled.svg icon-disabled.svg
 static := license.txt
 css := options.css
-js := bg.js  jquery-1.5.2.min.js  keyboard_shortcuts.js  options.js  popup.js
-html := bg.html  options.html  popup.html
+js := bg.js options.js popup.js
+html := options.html popup.html
 manifest := manifest.json
 
 collect : $(images) $(static) $(css) $(js) $(html) $(manifest) | $(BUILDDIR)
 
 release : clean collect
 	cd $(BUILDDIR) && zip -r -9 ../../BrowseQueue-`git describe --tags`.zip .
-	
+
 $(BUILDDIR) :
 	mkdir $(BUILDDIR)
 
@@ -43,8 +43,8 @@ $(manifest) : locales | $(BUILDDIR)
 	cp $@ $(BUILDDIR)/$@
 
 locales : | $(LOCALESBUILDDIR)
-	cp --recursive $(LOCALESDIR)/ $(BUILDDIR)/ #$(LOCALESBUILDDIR)/
+	cp -R $(LOCALESDIR) $(BUILDDIR)/
 
-.PHONY : clean
+.PHONY : clean $(static) $(css)
 clean :
 	-rm -r $(BUILDDIR)
